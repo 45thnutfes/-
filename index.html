@@ -10,8 +10,8 @@
 <style>
   :root{
     --bg-deep: #01030A;
-    --primary: #001DA5;   /* メインブルー */
-    --teal: #0BA4C8;      /* サブカラー（ティール） */
+    --primary: #001DA5;
+    --teal: #0BA4C8;
     --glow: #3E6BFF;
     --ink: #E8EEFF;
     --ink-dim: rgba(232, 238, 255, 0.58);
@@ -61,23 +61,6 @@
     pointer-events: none;
   }
 
-  .scanline{
-    position: fixed;
-    left: 0; right: 0;
-    height: 120px;
-    top: -120px;
-    z-index: 2;
-    background: linear-gradient(180deg, transparent, rgba(11,164,200,0.18), transparent);
-    animation: sweep 1.6s ease-out 0.05s 1 forwards;
-    pointer-events: none;
-  }
-  @keyframes sweep{
-    0%{ top: -120px; opacity: 0; }
-    10%{ opacity: 1; }
-    90%{ opacity: 1; }
-    100%{ top: 100%; opacity: 0; }
-  }
-
   .frame{
     position: relative;
     z-index: 1;
@@ -95,26 +78,14 @@
     to{ opacity: 1; transform: translateY(0); }
   }
 
-  .corner{
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--teal);
-  }
-  .corner--tl{ top: -1px; left: -1px; border-right: none; border-bottom: none; }
-  .corner--tr{ top: -1px; right: -1px; border-left: none; border-bottom: none; }
-  .corner--bl{ bottom: -1px; left: -1px; border-right: none; border-top: none; }
-  .corner--br{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
-
   .card{ text-align: center; }
 
-  /* ▼ロゴ：logo.png を index.html と同じフォルダに置いてください */
+  /* ===== 共通：ロゴ ===== */
   .logo-wrap{
+    position: relative;
     width: 128px;
     height: 128px;
     margin: 0 auto 20px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 1px rgba(11,164,200,0.4), 0 0 28px rgba(11,164,200,0.35);
     opacity: 0;
     transform: scale(0.85);
     animation: logoIn 0.6s cubic-bezier(.2,1.2,.4,1) 0.25s forwards;
@@ -124,6 +95,9 @@
     height: 100%;
     border-radius: 50%;
     display: block;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 0 1px rgba(11,164,200,0.4), 0 0 28px rgba(11,164,200,0.35);
   }
   @keyframes logoIn{
     to{ opacity: 1; transform: scale(1); }
@@ -136,11 +110,12 @@
     gap: 8px;
     font-family: 'Space Mono', monospace;
     font-size: 11px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     color: var(--teal);
     margin-bottom: 10px;
     opacity: 0;
     animation: fadeUp 0.6s ease-out 0.55s forwards;
+    min-height: 14px;
   }
   .status-dot{
     width: 6px; height: 6px;
@@ -151,7 +126,6 @@
   }
   @keyframes blink{ 0%,100%{ opacity: 1; } 50%{ opacity: 0.3; } }
 
-  /* ▼回数：ここを書き換えてください */
   .event-line{
     font-family: 'Zen Kaku Gothic New', sans-serif;
     font-weight: 700;
@@ -163,7 +137,6 @@
     animation: fadeUp 0.6s ease-out 0.65s forwards;
   }
 
-  /* ▼開催日：ここを書き換えてください */
   .date-line{
     font-family: 'Space Mono', monospace;
     font-size: 11.5px;
@@ -174,27 +147,6 @@
     animation: fadeUp 0.6s ease-out 0.72s forwards;
   }
 
-  /* ▼テーマバッジ：ここを書き換えてください */
-  .badge{
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: 0.10em;
-    color: var(--bg-deep);
-    background: linear-gradient(120deg, var(--teal), var(--glow));
-    display: inline-block;
-    padding: 8px 20px;
-    margin-bottom: 26px;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-    opacity: 0;
-    transform: scale(0.85);
-    animation: badgeIn 0.5s cubic-bezier(.2,1.3,.4,1) 0.85s forwards;
-  }
-  @keyframes badgeIn{
-    to{ opacity: 1; transform: scale(1); }
-  }
-
-  /* ▼メインの挨拶文：ここを書き換えてください */
   h1{
     font-size: 26px;
     line-height: 1.5;
@@ -209,18 +161,18 @@
     text-shadow: 0 0 18px rgba(11,164,200,0.5);
   }
 
-  /* ▼サブメッセージ：ここを書き換えてください */
+  /* パターンごとに切り替わる一言メッセージ */
   p.msg{
     font-size: 14.5px;
     line-height: 1.9;
     color: var(--ink-dim);
     margin: 0 auto 28px;
     max-width: 300px;
+    min-height: 54px;
     opacity: 0;
     animation: fadeUp 0.6s ease-out 1.15s forwards;
   }
 
-  /* ▼ハッシュタグ：ここを書き換えてください */
   .readout{
     font-family: 'Space Mono', monospace;
     font-size: 10.5px;
@@ -239,9 +191,81 @@
     to{ opacity: 1; transform: translateY(0); }
   }
 
+  /* ================================================
+     ここから下：3パターンぶんの「装飾だけ」の違い
+     ================================================ */
+
+  /* ---- パターンA：HUDスキャン風（角の枠＋上から光が流れる） ---- */
+  .corner{
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--teal);
+    display: none;
+  }
+  body.variant-a .corner{ display: block; }
+  .corner--tl{ top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .corner--tr{ top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .corner--bl{ bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .corner--br{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .scanline{
+    position: fixed;
+    left: 0; right: 0;
+    height: 120px;
+    top: -120px;
+    z-index: 2;
+    background: linear-gradient(180deg, transparent, rgba(11,164,200,0.18), transparent);
+    pointer-events: none;
+    display: none;
+  }
+  body.variant-a .scanline{
+    display: block;
+    animation: sweep 1.6s ease-out 0.05s 1 forwards;
+  }
+  @keyframes sweep{
+    0%{ top: -120px; opacity: 0; }
+    10%{ opacity: 1; }
+    90%{ opacity: 1; }
+    100%{ top: 100%; opacity: 0; }
+  }
+
+  /* ---- パターンB：レーダー風（ロゴの周りに波紋が広がる） ---- */
+  .radar-ring{
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid var(--teal);
+    opacity: 0;
+    display: none;
+  }
+  body.variant-b .frame{ border-radius: 18px; }
+  body.variant-b .radar-ring{
+    display: block;
+    animation: radar 2.4s ease-out infinite;
+  }
+  body.variant-b .radar-ring.r2{ animation-delay: 0.8s; }
+  body.variant-b .radar-ring.r3{ animation-delay: 1.6s; }
+  @keyframes radar{
+    0%{ transform: scale(1); opacity: 0.55; }
+    100%{ transform: scale(1.7); opacity: 0; }
+  }
+
+  /* ---- パターンC：ターミナル風（点線の枠＋文末に点滅カーソル） ---- */
+  body.variant-c .frame{
+    border-style: dashed;
+    border-radius: 4px;
+  }
+  .cursor{
+    display: none;
+    color: var(--teal);
+    animation: blink 1s step-end infinite;
+  }
+  body.variant-c .cursor{ display: inline-block; }
+
   @media (prefers-reduced-motion: reduce){
-    .scanline{ display: none; }
-    .frame, .logo-wrap, .status-row, .event-line, .date-line, .badge, h1, p.msg, .readout{
+    .scanline, .radar-ring, .cursor{ animation: none !important; display: none !important; }
+    .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout{
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
@@ -265,25 +289,23 @@
     <div class="card">
 
       <div class="logo-wrap">
+        <span class="radar-ring r1"></span>
+        <span class="radar-ring r2"></span>
+        <span class="radar-ring r3"></span>
         <img src="logo.png" alt="第45回技大祭ロゴ">
       </div>
 
       <div class="status-row">
         <span class="status-dot"></span>
-        SCAN COMPLETE
+        <span id="statusText"></span>
       </div>
 
       <div class="event-line">第45回技大祭</div>
       <div class="date-line">令和8年 9/19（土）・9/20（日）</div>
 
-      <div class="badge">Bluem Up Date</div>
-
       <h1>ご来場<br><span class="accent">ありがとうございます！</span></h1>
 
-      <p class="msg">
-        技大祭へのご来場を確認しました。<br>
-        今日という一日が、良い思い出になりますように。
-      </p>
+      <p class="msg" id="msgText"></p>
 
       <div class="readout">
         <strong>#技大祭</strong> &nbsp;|&nbsp; <strong>#NUTFES</strong>
@@ -291,6 +313,29 @@
 
     </div>
   </div>
+
+<script>
+  // ▼パターンはここで追加・編集できます（status = 状態表示テキスト、message = 一言メッセージ）
+  const variants = [
+    { id: 'variant-a', status: 'SCAN COMPLETE',      message: 'みんなのお気に入りの企画・お店は見つけられたかな？' },
+    { id: 'variant-b', status: 'SIGNAL LOCKED',       message: '今日1日が、楽しく過ごせることを願っています' },
+    { id: 'variant-c', status: 'LOG: ENTRY RECORDED', message: 'いろんな企画に参加して、景品をたくさんもらおう！' }
+  ];
+
+  const picked = variants[Math.floor(Math.random() * variants.length)];
+
+  document.body.classList.add(picked.id);
+  document.getElementById('statusText').textContent = picked.status;
+
+  const msgEl = document.getElementById('msgText');
+  msgEl.textContent = picked.message;
+  if (picked.id === 'variant-c') {
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.textContent = '_';
+    msgEl.appendChild(cursor);
+  }
+</script>
 
 </body>
 </html>
