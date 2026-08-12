@@ -50,7 +50,6 @@
     pointer-events: none;
   }
 
-  /* 質感を出すためのフィルムグレイン */
   .grain{
     position: fixed; inset: 0; z-index: 3; pointer-events: none;
     opacity: 0.05; mix-blend-mode: overlay;
@@ -58,8 +57,8 @@
   }
 
   .frame{
-    position: relative; z-index: 1; width: 100%; max-width: 400px;
-    padding: 36px 26px 32px;
+    position: relative; z-index: 1; width: 100%; max-width: 420px;
+    padding: 32px 24px 28px;
     border: 1px solid rgba(11,164,200,0.32);
     background: linear-gradient(180deg, rgba(0,29,165,0.16), rgba(1,3,10,0.25));
     backdrop-filter: blur(2px);
@@ -71,20 +70,20 @@
   .card{ text-align: center; position: relative; z-index: 2; }
 
   .logo-wrap{
-    position: relative; width: 128px; height: 128px; margin: 0 auto 20px;
+    position: relative; width: 100px; height: 100px; margin: 0 auto 16px;
     opacity: 0; transform: scale(0.85);
     animation: logoIn 0.6s cubic-bezier(.2,1.2,.4,1) 0.25s forwards;
   }
   .logo-wrap img{
     width: 100%; height: 100%; border-radius: 50%; display: block; position: relative; z-index: 1;
-    box-shadow: 0 0 0 1px rgba(11,164,200,0.4), 0 0 28px rgba(11,164,200,0.35);
+    box-shadow: 0 0 0 1px rgba(11,164,200,0.4), 0 0 24px rgba(11,164,200,0.35);
   }
   @keyframes logoIn{ to{ opacity: 1; transform: scale(1); } }
 
   .status-row{
     display: flex; align-items: center; justify-content: center; gap: 8px;
     font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--teal);
-    margin-bottom: 10px; opacity: 0; animation: fadeUp 0.6s ease-out 0.55s forwards; min-height: 14px;
+    margin-bottom: 8px; opacity: 0; animation: fadeUp 0.6s ease-out 0.55s forwards; min-height: 14px;
   }
   .status-dot{
     width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal);
@@ -93,52 +92,84 @@
   @keyframes blink{ 0%,100%{ opacity: 1; } 50%{ opacity: 0.3; } }
 
   .event-line{
-    font-weight: 700; font-size: 15px; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 4px;
+    font-weight: 700; font-size: 14px; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 3px;
     opacity: 0; animation: fadeUp 0.6s ease-out 0.65s forwards;
   }
   .date-line{
-    font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.04em; color: var(--ink-dim);
-    margin-bottom: 20px; opacity: 0; animation: fadeUp 0.6s ease-out 0.72s forwards;
+    font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-dim);
+    margin-bottom: 16px; opacity: 0; animation: fadeUp 0.6s ease-out 0.72s forwards;
   }
 
   h1{
-    font-size: 26px; line-height: 1.5; font-weight: 900; margin: 0 0 14px; letter-spacing: 0.01em;
+    font-size: 23px; line-height: 1.5; font-weight: 900; margin: 0 0 10px; letter-spacing: 0.01em;
     opacity: 0; animation: fadeUp 0.6s ease-out 1s forwards;
   }
   h1 .accent{ color: var(--teal); text-shadow: 0 0 18px rgba(79,227,255,0.4); }
 
   p.msg{
-    font-size: 14.5px; line-height: 1.9; color: var(--ink-dim); margin: 0 auto 24px; max-width: 300px;
-    min-height: 54px; opacity: 0; animation: fadeUp 0.6s ease-out 1.15s forwards;
+    font-size: 13.5px; line-height: 1.85; color: var(--ink-dim); margin: 0 auto 18px; max-width: 300px;
+    min-height: 48px; opacity: 0; animation: fadeUp 0.6s ease-out 1.15s forwards;
   }
 
-  /* ▼リンクボタン */
+  /* ▼写真スライドショー */
+  .carousel{
+    position: relative; width: 100%; aspect-ratio: 3 / 2; border-radius: 10px; overflow: hidden;
+    margin-bottom: 18px; opacity: 0; animation: fadeUp 0.6s ease-out 1.25s forwards;
+    box-shadow: 0 0 0 1px rgba(232,238,255,0.12);
+    background: rgba(255,255,255,0.03);
+  }
+  .carousel-track{
+    display: flex; height: 100%; transition: transform 0.4s ease;
+    touch-action: pan-y;
+  }
+  .carousel-track img{
+    width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; display: block;
+  }
+  .carousel-arrow{
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: rgba(1,3,10,0.55); color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; backdrop-filter: blur(2px);
+  }
+  .carousel-arrow.prev{ left: 8px; }
+  .carousel-arrow.next{ right: 8px; }
+  .carousel-dots{
+    position: absolute; bottom: 8px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 6px;
+  }
+  .carousel-dots span{
+    width: 5px; height: 5px; border-radius: 50%; background: rgba(232,238,255,0.35);
+    transition: background 0.2s;
+  }
+  .carousel-dots span.active{ background: var(--teal); }
+
   .link-buttons{
-    display: flex; gap: 10px; justify-content: center; margin-bottom: 22px;
-    opacity: 0; animation: fadeUp 0.6s ease-out 1.3s forwards;
+    display: flex; gap: 10px; justify-content: center; margin-bottom: 18px;
+    opacity: 0; animation: fadeUp 0.6s ease-out 1.35s forwards;
   }
   .link-btn{
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 16px; border-radius: 999px;
+    padding: 9px 14px; border-radius: 999px;
     border: 1px solid rgba(232,238,255,0.22);
     background: rgba(255,255,255,0.04);
     color: var(--ink); text-decoration: none;
-    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+    font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
     transition: border-color .2s, background .2s;
   }
   .link-btn:hover{ border-color: var(--teal); background: rgba(255,255,255,0.08); }
-  .link-btn svg{ width: 14px; height: 14px; stroke: var(--teal); flex-shrink: 0; }
+  .link-btn svg{ width: 13px; height: 13px; stroke: var(--teal); flex-shrink: 0; }
 
   .readout{
-    font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: rgba(232,238,255,0.4);
-    border-top: 1px dashed rgba(11,164,200,0.28); padding-top: 18px; line-height: 1.9;
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: rgba(232,238,255,0.4);
+    border-top: 1px dashed rgba(11,164,200,0.28); padding-top: 14px; line-height: 1.9;
     opacity: 0; animation: fadeUp 0.6s ease-out 1.45s forwards;
   }
   .readout strong{ color: var(--teal); font-weight: 700; }
 
   @keyframes fadeUp{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: translateY(0); } }
 
-  /* ============ パターンA：HUDスキャナー風 ============ */
+  /* ============ パターンA ============ */
   .hud-grid{
     position: fixed; inset: 0; z-index: 0; display: none; opacity: 0.10;
     background-image: linear-gradient(var(--teal) 1px, transparent 1px), linear-gradient(90deg, var(--teal) 1px, transparent 1px);
@@ -155,17 +186,14 @@
   .corner--bl{ bottom: -1px; left: -1px; border-right: none; border-top: none; }
   .corner--br{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
-  .scan-ring{ position: absolute; inset: -14px; border-radius: 50%; border: 1px dashed var(--teal); opacity: 0; display: none; }
+  .scan-ring{ position: absolute; inset: -12px; border-radius: 50%; border: 1px dashed var(--teal); opacity: 0; display: none; }
   body.variant-a .scan-ring{ display: block; animation: ringSpin 12s linear infinite, fadeIn 0.6s ease-out 0.3s forwards; }
-  .scan-ring.r2{ inset: -30px; border-style: solid; border-width: 1px; opacity: 0; }
+  .scan-ring.r2{ inset: -26px; border-style: solid; }
   body.variant-a .scan-ring.r2{ animation: ringSpinRev 18s linear infinite, fadeIn2 0.6s ease-out 0.4s forwards; }
   @keyframes ringSpin{ from{ transform: rotate(0deg); } to{ transform: rotate(360deg); } }
   @keyframes ringSpinRev{ from{ transform: rotate(0deg); } to{ transform: rotate(-360deg); } }
   @keyframes fadeIn{ to{ opacity: 0.7; } }
   @keyframes fadeIn2{ to{ opacity: 0.35; } }
-
-  .scan-tick{ position: absolute; width: 8px; height: 2px; background: var(--teal); display: none; }
-  body.variant-a .scan-tick{ display: block; }
 
   .scanline{
     position: fixed; left: 0; right: 0; height: 120px; top: -120px; z-index: 2;
@@ -175,29 +203,27 @@
   body.variant-a .scanline{ display: block; animation: sweep 1.8s ease-out 0.05s 1 forwards; }
   @keyframes sweep{ 0%{ top: -120px; opacity: 0; } 10%{ opacity: 1; } 90%{ opacity: 1; } 100%{ top: 100%; opacity: 0; } }
 
-  /* ============ パターンB：ライトレイン・シティ風 ============ */
+  /* ============ パターンB ============ */
   .city-layer{ position: fixed; inset: 0; z-index: 0; display: none; overflow: hidden; pointer-events: none; }
   body.variant-b .city-layer{ display: block; }
-
   .beam{
     position: absolute; top: -30%; width: 2px; height: 160%;
     background: linear-gradient(180deg, transparent, var(--teal), transparent);
     opacity: 0.28; animation: beamFall 3.6s linear infinite;
   }
   @keyframes beamFall{ 0%{ transform: translateY(-15%); opacity: 0; } 15%{ opacity: 0.35; } 85%{ opacity: 0.35; } 100%{ transform: translateY(15%); opacity: 0; } }
-
-  .skyline{ position: absolute; bottom: 0; left: 0; right: 0; height: 34%; display: flex; align-items: flex-end; gap: 3px; opacity: 0.6; }
+  .skyline{ position: absolute; bottom: 0; left: 0; right: 0; height: 30%; display: flex; align-items: flex-end; gap: 3px; opacity: 0.6; }
   .skyline .b{ position: relative; flex: 1; background: linear-gradient(180deg, transparent, var(--primary)); border-top: 1px solid rgba(156,140,255,0.25); }
   .win{ position: absolute; width: 2px; height: 2px; background: var(--teal); opacity: 0.5; animation: twinkle 2.6s ease-in-out infinite; }
   @keyframes twinkle{ 0%,100%{ opacity: 0.15; } 50%{ opacity: 0.75; } }
 
-  /* ============ パターンC：プレクサス・ネットワーク風 ============ */
+  /* ============ パターンC ============ */
   .network-layer{ position: fixed; inset: 0; z-index: 0; display: none; }
   body.variant-c .network-layer{ display: block; }
 
   @media (prefers-reduced-motion: reduce){
     .scanline, .scan-ring, .beam, .win{ animation: none !important; display: none !important; }
-    .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons{
+    .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel{
       animation: none !important; opacity: 1 !important; transform: none !important;
     }
     .status-dot{ animation: none; }
@@ -240,6 +266,14 @@
 
       <p class="msg" id="msgText"></p>
 
+      <!-- ▼写真スライドショー：ここは自動で作られます -->
+      <div class="carousel" id="carousel">
+        <div class="carousel-track" id="carouselTrack"></div>
+        <button class="carousel-arrow prev" id="prevBtn" aria-label="前の写真">‹</button>
+        <button class="carousel-arrow next" id="nextBtn" aria-label="次の写真">›</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+
       <!-- ▼リンク先はここで変更できます -->
       <div class="link-buttons">
         <a class="link-btn" href="https://www.instagram.com/nutfes" target="_blank" rel="noopener noreferrer">
@@ -248,7 +282,7 @@
         </a>
         <a class="link-btn" href="https://www.nutfes.net/" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9s1.3-6.5 3.8-9z"/></svg>
-          Website
+          ホームページ
         </a>
       </div>
 
@@ -261,9 +295,9 @@
 
 <script>
   const variants = [
-    { id: 'variant-a', status: 'SCAN COMPLETE',      message: 'みんなのお気に入りの企画・お店は見つけられたかな？' },
-    { id: 'variant-b', status: 'SIGNAL LOCKED',       message: '今日1日が、楽しく過ごせることを願っています' },
-    { id: 'variant-c', status: 'LOG: ENTRY RECORDED', message: 'いろんな企画に参加して、景品をたくさんもらおう！' }
+    { id: 'variant-a', status: 'SCAN COMPLETE',      message: 'みんなのお気に入りの企画・お店は見つけられたかな？', photos: ['photos/photo-a1.jpg','photos/photo-a2.jpg','photos/photo-a3.jpg','photos/photo-a4.jpg'] },
+    { id: 'variant-b', status: 'SIGNAL LOCKED',       message: '今日1日が、楽しく過ごせることを願っています',           photos: ['photos/photo-b1.jpg','photos/photo-b2.jpg','photos/photo-b3.jpg','photos/photo-b4.jpg'] },
+    { id: 'variant-c', status: 'LOG: ENTRY RECORDED', message: 'いろんな企画に参加して、景品をたくさんもらおう！',       photos: ['photos/photo-c1.jpg','photos/photo-c2.jpg','photos/photo-c3.jpg','photos/photo-c4.jpg'] }
   ];
 
   const picked = variants[Math.floor(Math.random() * variants.length)];
@@ -271,20 +305,47 @@
   document.getElementById('statusText').textContent = picked.status;
   document.getElementById('msgText').textContent = picked.message;
 
-  if (picked.id === 'variant-a') {
-    const wrap = document.querySelector('.logo-wrap');
-    for (let i = 0; i < 16; i++) {
-      const tick = document.createElement('span');
-      tick.className = 'scan-tick';
-      tick.style.left = '50%';
-      tick.style.top = '-16px';
-      tick.style.transformOrigin = '1px 80px';
-      tick.style.transform = `rotate(${i * 22.5}deg)`;
-      tick.style.opacity = i % 3 === 0 ? '0.9' : '0.35';
-      wrap.appendChild(tick);
-    }
+  /* ---- 写真スライドショーの構築（選ばれたパターンの4枚だけ読み込む） ---- */
+  const track = document.getElementById('carouselTrack');
+  const dotsWrap = document.getElementById('carouselDots');
+  let current = 0;
+
+  picked.photos.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `技大祭 過去の様子 ${i + 1}`;
+    img.loading = i === 0 ? 'eager' : 'lazy';
+    track.appendChild(img);
+
+    const dot = document.createElement('span');
+    if (i === 0) dot.classList.add('active');
+    dotsWrap.appendChild(dot);
+  });
+
+  function goTo(index){
+    const total = picked.photos.length;
+    current = (index + total) % total;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    [...dotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === current));
   }
 
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  let startX = 0;
+  track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (diff > 40) goTo(current - 1);
+    else if (diff < -40) goTo(current + 1);
+  }, { passive: true });
+
+  /* ---- パターンA：装飾 ---- */
+  if (picked.id === 'variant-a') {
+    // scan-ring は CSSのみで完結
+  }
+
+  /* ---- パターンB：ビルと光の柱 ---- */
   if (picked.id === 'variant-b') {
     const layer = document.getElementById('cityLayer');
     const skyline = document.createElement('div');
@@ -316,6 +377,7 @@
     }
   }
 
+  /* ---- パターンC：粒子ネットワーク ---- */
   if (picked.id === 'variant-c') {
     const canvas = document.getElementById('networkLayer');
     const ctx = canvas.getContext('2d');
