@@ -249,6 +249,51 @@
     text-align: center; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--ink-dim); margin-top: 10px;
   }
 
+  /* ▼ルール説明画面 */
+  .game-rules{
+    text-align: center;
+    padding: 28px 22px 24px;
+    border: 1px solid rgba(232,238,255,0.15);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+  }
+  .game-rules-title{
+    font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 14px;
+    letter-spacing: 0.06em; color: var(--teal); margin-bottom: 16px;
+  }
+  .game-rules-visual{
+    width: 100%; height: 90px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+  }
+  .game-rules-visual .rv-particle{
+    width: 14px; height: 14px; border-radius: 50%; background: var(--ink);
+    box-shadow: 0 0 10px var(--teal); flex-shrink: 0;
+  }
+  .game-rules-visual .rv-arrow{ color: var(--teal); font-size: 20px; }
+  .game-rules-visual .rv-wall{
+    width: 20px; height: 60px; position: relative; flex-shrink: 0;
+  }
+  .game-rules-visual .rv-wall::before, .game-rules-visual .rv-wall::after{
+    content: ''; position: absolute; left: 0; right: 0; background: var(--teal); opacity: 0.85;
+  }
+  .game-rules-visual .rv-wall::before{ top: 0; height: 18px; }
+  .game-rules-visual .rv-wall::after{ bottom: 0; height: 18px; }
+  .game-rules-list{
+    text-align: left; list-style: none; margin: 0 0 20px; padding: 0;
+    font-size: 12.5px; line-height: 1.9; color: var(--ink-dim);
+  }
+  .game-rules-list li{ display: flex; gap: 8px; margin-bottom: 6px; }
+  .game-rules-list li::before{
+    content: '▸'; color: var(--teal); flex-shrink: 0;
+  }
+  .game-start-btn{
+    display: inline-block; width: 100%;
+    padding: 12px 0; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(120deg, var(--teal), var(--glow));
+    color: var(--bg-deep); font-family: 'Orbitron', sans-serif; font-weight: 800;
+    font-size: 13px; letter-spacing: 0.06em;
+  }
+
   @media (prefers-reduced-motion: reduce){
     .scanline, .scan-ring, .beam, .win{ animation: none !important; display: none !important; }
     .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel, .game-btn{
@@ -327,12 +372,38 @@
   <!-- ▼ミニゲーム -->
   <div class="game-overlay" id="gameOverlay">
     <div class="game-box">
-      <div class="game-header">
-        <span>SCORE: <span class="game-score" id="gameScore">0</span></span>
-        <button class="game-close" id="gameCloseBtn" aria-label="閉じる">×</button>
+
+      <!-- ルール説明画面 -->
+      <div class="game-rules" id="gameRules">
+        <div class="game-header" style="margin-bottom:18px;">
+          <span>MINI GAME</span>
+          <button class="game-close" id="gameCloseBtnRules" aria-label="閉じる">×</button>
+        </div>
+        <div class="game-rules-title">壁よけタップゲーム</div>
+        <div class="game-rules-visual">
+          <span class="rv-particle"></span>
+          <span class="rv-arrow">→</span>
+          <span class="rv-wall"></span>
+        </div>
+        <ul class="game-rules-list">
+          <li>画面をタップすると、光る粒子がふわっと浮き上がります</li>
+          <li>奥から壁が流れてくるので、隙間をねらってすり抜けよう</li>
+          <li>壁に当たる・画面の外に出るとゲームオーバー</li>
+          <li>通過した壁の数がスコアになります</li>
+        </ul>
+        <button class="game-start-btn" id="startGameBtn" type="button">はじめる</button>
       </div>
-      <canvas id="gameCanvas"></canvas>
-      <div class="game-hint" id="gameHint">タップして開始</div>
+
+      <!-- ゲーム本編 -->
+      <div id="gamePlay" style="display:none;">
+        <div class="game-header">
+          <span>SCORE: <span class="game-score" id="gameScore">0</span></span>
+          <button class="game-close" id="gameCloseBtn" aria-label="閉じる">×</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-hint" id="gameHint">タップして開始</div>
+      </div>
+
     </div>
   </div>
 
@@ -470,6 +541,10 @@
   const overlay = document.getElementById('gameOverlay');
   const openBtn = document.getElementById('openGameBtn');
   const closeBtn = document.getElementById('gameCloseBtn');
+  const closeBtnRules = document.getElementById('gameCloseBtnRules');
+  const rulesScreen = document.getElementById('gameRules');
+  const playScreen = document.getElementById('gamePlay');
+  const startGameBtn = document.getElementById('startGameBtn');
   const canvas = document.getElementById('gameCanvas');
   const ctx2 = canvas.getContext('2d');
   const scoreEl = document.getElementById('gameScore');
@@ -595,6 +670,13 @@
     accentColor = getComputedStyle(document.body).getPropertyValue('--teal').trim() || '#0BA4C8';
     bgNetworkPaused = true;
     overlay.classList.add('open');
+    rulesScreen.style.display = 'block';
+    playScreen.style.display = 'none';
+  });
+
+  startGameBtn.addEventListener('click', () => {
+    rulesScreen.style.display = 'none';
+    playScreen.style.display = 'block';
     resetGame();
   });
 
@@ -605,6 +687,7 @@
     bgNetworkPaused = false;
   }
   closeBtn.addEventListener('click', closeGame);
+  closeBtnRules.addEventListener('click', closeGame);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 </script>
 
