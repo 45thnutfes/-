@@ -101,6 +101,7 @@
     if (state === 'ready') {
       state = 'playing';
       startCaption.style.display = 'none';
+      window.dispatchEvent(new CustomEvent('gameStart'));
       startBgm();
       player.vy = -2.4;
       loopId = requestAnimationFrame(loop);
@@ -109,6 +110,7 @@
     if (state === 'over') {
       reset();
       state = 'playing';
+      window.dispatchEvent(new CustomEvent('gameStart'));
       startBgm();
       player.vy = -2.4;
       loopId = requestAnimationFrame(loop);
@@ -132,6 +134,7 @@
     resultHighEl.textContent = highScore;
     newRecordEl.style.display = isRecord ? 'inline-block' : 'none';
     resultEl.hidden = false;
+    window.dispatchEvent(new CustomEvent('gameEnd', { detail: { score, highScore } }));
   }
 
   function loop() {

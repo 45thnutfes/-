@@ -176,7 +176,9 @@
   .game-topbar{
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
     font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-dim);
+    transition: opacity 0.2s, transform 0.2s;
   }
+  .game-panel.playing .game-topbar{ opacity: 0; transform: translateY(-6px); pointer-events: none; }
   .game-title{ color: var(--ink); font-weight: 700; }
   #liveScore{ color: var(--teal); font-weight: 700; }
 
@@ -214,7 +216,9 @@
 
   .game-caption{
     margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--ink-dim); line-height: 1.8;
+    transition: opacity 0.2s;
   }
+  .game-panel.playing .game-caption{ opacity: 0; }
 
   @media (prefers-reduced-motion: reduce){
     .scan-ring, .beam, .win, .scroll-hint{ animation: none !important; }
@@ -280,7 +284,7 @@
 
     <!-- ▼2画面目：ミニゲーム -->
     <section class="section-game">
-      <div class="game-panel">
+      <div class="game-panel" id="gamePanel">
         <div class="game-topbar">
           <span class="game-title">壁よけタップゲーム</span>
           <span id="liveScore">SCORE 0</span>
@@ -395,6 +399,9 @@
     }
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) draw();
   }
+  const gamePanel = document.getElementById('gamePanel');
+  window.addEventListener('gameStart', () => gamePanel.classList.add('playing'));
+  window.addEventListener('gameEnd', () => gamePanel.classList.remove('playing'));
 </script>
 
 <script src="game.js" defer></script>
