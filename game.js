@@ -75,7 +75,7 @@
     speed = 0.9;
     elapsed = 0;
     liveScoreEl.textContent = 'SCORE 0';
-    resultEl.hidden = true;
+    resultEl.classList.remove('show');
   }
   reset();
 
@@ -133,7 +133,7 @@
     resultScoreEl.textContent = score;
     resultHighEl.textContent = highScore;
     newRecordEl.style.display = isRecord ? 'inline-block' : 'none';
-    resultEl.hidden = false;
+    resultEl.classList.add('show');
     window.dispatchEvent(new CustomEvent('gameEnd', { detail: { score, highScore } }));
   }
 
