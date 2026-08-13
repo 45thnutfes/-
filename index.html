@@ -16,30 +16,14 @@
     --ink: #E8EEFF;
     --ink-dim: rgba(232, 238, 255, 0.58);
   }
-
   body.variant-a{ --teal:#20D9D2; --glow:#0BA4C8; }
   body.variant-b{ --teal:#9C8CFF; --glow:#6E7CFF; }
   body.variant-c{ --teal:#4F8CFF; --glow:#2255CC; }
 
   *{ box-sizing: border-box; }
-
-  html, body{
-    margin: 0;
-    padding: 0;
-    background: var(--bg-deep);
-    color: var(--ink);
-    font-family: 'Zen Kaku Gothic New', sans-serif;
-    overflow-x: hidden;
-  }
-
-  body{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 32px 18px;
-    position: relative;
-  }
+  html, body{ margin: 0; padding: 0; background: var(--bg-deep); color: var(--ink); font-family: 'Zen Kaku Gothic New', sans-serif; }
+  html{ height: 100%; }
+  body{ height: 100%; overflow: hidden; position: relative; }
 
   .field{
     position: fixed; inset: 0; z-index: 0;
@@ -49,28 +33,53 @@
       var(--bg-deep);
     pointer-events: none;
   }
-
   .grain{
     position: fixed; inset: 0; z-index: 3; pointer-events: none;
     opacity: 0.05; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
+  /* ▼スクロールで下の画面(ゲーム)に切り替わる仕組み */
+  .scroll-container{
+    position: relative; z-index: 1;
+    height: 100%; overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .section-main{
+    height: calc(100% - 46px); /* あえて少し低くして、下のゲーム画面を"少しだけ"覗かせる */
+    scroll-snap-align: start;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 18px 0;
+    position: relative;
+  }
+  .section-game{
+    min-height: 100%;
+    scroll-snap-align: start;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 18px;
+  }
+  .scroll-hint{
+    position: absolute; bottom: 10px; left: 0; right: 0;
+    text-align: center; font-family: 'Space Mono', monospace; font-size: 10.5px;
+    color: var(--teal); letter-spacing: 0.06em;
+    animation: bounce 1.6s ease-in-out infinite;
+  }
+  @keyframes bounce{ 0%,100%{ transform: translateY(0); opacity: 0.6; } 50%{ transform: translateY(4px); opacity: 1; } }
+
   .frame{
-    position: relative; z-index: 1; width: 100%; max-width: 420px;
-    padding: 32px 24px 28px;
+    position: relative; width: 100%; max-width: 420px;
+    padding: 30px 24px 22px;
     border: 1px solid rgba(11,164,200,0.32);
     background: linear-gradient(180deg, rgba(0,29,165,0.16), rgba(1,3,10,0.25));
     backdrop-filter: blur(2px);
-    opacity: 0;
-    animation: frameIn 0.6s ease-out 0.15s forwards;
+    opacity: 0; animation: frameIn 0.6s ease-out 0.15s forwards;
   }
   @keyframes frameIn{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: translateY(0); } }
-
   .card{ text-align: center; position: relative; z-index: 2; }
 
   .logo-wrap{
-    position: relative; width: 100px; height: 100px; margin: 0 auto 16px;
+    position: relative; width: 92px; height: 92px; margin: 0 auto 14px;
     opacity: 0; transform: scale(0.85);
     animation: logoIn 0.6s cubic-bezier(.2,1.2,.4,1) 0.25s forwards;
   }
@@ -85,218 +94,131 @@
     font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--teal);
     margin-bottom: 8px; opacity: 0; animation: fadeUp 0.6s ease-out 0.55s forwards; min-height: 14px;
   }
-  .status-dot{
-    width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal);
-    animation: blink 1.4s ease-in-out infinite;
-  }
+  .status-dot{ width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink{ 0%,100%{ opacity: 1; } 50%{ opacity: 0.3; } }
 
-  .event-line{
-    font-weight: 700; font-size: 14px; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 3px;
-    opacity: 0; animation: fadeUp 0.6s ease-out 0.65s forwards;
-  }
-  .date-line{
-    font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-dim);
-    margin-bottom: 16px; opacity: 0; animation: fadeUp 0.6s ease-out 0.72s forwards;
-  }
+  .event-line{ font-weight: 700; font-size: 14px; letter-spacing: 0.04em; margin-bottom: 3px; opacity: 0; animation: fadeUp 0.6s ease-out 0.65s forwards; }
+  .date-line{ font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--ink-dim); margin-bottom: 14px; opacity: 0; animation: fadeUp 0.6s ease-out 0.72s forwards; }
 
-  h1{
-    font-size: 23px; line-height: 1.5; font-weight: 900; margin: 0 0 10px; letter-spacing: 0.01em;
-    opacity: 0; animation: fadeUp 0.6s ease-out 1s forwards;
-  }
+  h1{ font-size: 22px; line-height: 1.5; font-weight: 900; margin: 0 0 8px; opacity: 0; animation: fadeUp 0.6s ease-out 1s forwards; }
   h1 .accent{ color: var(--teal); text-shadow: 0 0 18px rgba(79,227,255,0.4); }
 
-  p.msg{
-    font-size: 13.5px; line-height: 1.85; color: var(--ink-dim); margin: 0 auto 18px; max-width: 300px;
-    min-height: 48px; opacity: 0; animation: fadeUp 0.6s ease-out 1.15s forwards;
-  }
+  p.msg{ font-size: 13px; line-height: 1.8; color: var(--ink-dim); margin: 0 auto 14px; max-width: 300px; min-height: 44px; opacity: 0; animation: fadeUp 0.6s ease-out 1.15s forwards; }
 
   .carousel{
     position: relative; width: 100%; aspect-ratio: 3 / 2; border-radius: 10px; overflow: hidden;
-    margin-bottom: 18px; opacity: 0; animation: fadeUp 0.6s ease-out 1.25s forwards;
-    box-shadow: 0 0 0 1px rgba(232,238,255,0.12);
-    background: rgba(255,255,255,0.03);
+    margin-bottom: 14px; opacity: 0; animation: fadeUp 0.6s ease-out 1.25s forwards;
+    box-shadow: 0 0 0 1px rgba(232,238,255,0.12); background: rgba(255,255,255,0.03);
   }
   .carousel-track{ display: flex; height: 100%; transition: transform 0.4s ease; touch-action: pan-y; }
   .carousel-track img{ width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; display: block; }
   .carousel-arrow{
     position: absolute; top: 50%; transform: translateY(-50%);
-    width: 28px; height: 28px; border-radius: 50%; border: none;
+    width: 26px; height: 26px; border-radius: 50%; border: none;
     background: rgba(1,3,10,0.55); color: var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; cursor: pointer; backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;
   }
-  .carousel-arrow.prev{ left: 8px; }
-  .carousel-arrow.next{ right: 8px; }
+  .carousel-arrow.prev{ left: 8px; } .carousel-arrow.next{ right: 8px; }
   .carousel-dots{ position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
-  .carousel-dots span{ width: 5px; height: 5px; border-radius: 50%; background: rgba(232,238,255,0.35); transition: background 0.2s; }
+  .carousel-dots span{ width: 5px; height: 5px; border-radius: 50%; background: rgba(232,238,255,0.35); }
   .carousel-dots span.active{ background: var(--teal); }
 
-  .link-buttons{
-    display: flex; gap: 10px; justify-content: center; margin-bottom: 12px;
-    opacity: 0; animation: fadeUp 0.6s ease-out 1.35s forwards;
-  }
+  .link-buttons{ display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; opacity: 0; animation: fadeUp 0.6s ease-out 1.35s forwards; }
   .link-btn{
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 14px; border-radius: 999px;
-    border: 1px solid rgba(232,238,255,0.22);
-    background: rgba(255,255,255,0.04);
-    color: var(--ink); text-decoration: none;
-    font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
-    transition: border-color .2s, background .2s;
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 999px;
+    border: 1px solid rgba(232,238,255,0.22); background: rgba(255,255,255,0.04);
+    color: var(--ink); text-decoration: none; font-family: 'Space Mono', monospace; font-size: 10px;
   }
-  .link-btn:hover{ border-color: var(--teal); background: rgba(255,255,255,0.08); }
-  .link-btn svg{ width: 13px; height: 13px; stroke: var(--teal); flex-shrink: 0; }
-
-  /* ▼ゲーム起動ボタン */
-  .game-btn{
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 20px; border-radius: 999px; border: none; cursor: pointer;
-    background: linear-gradient(120deg, var(--teal), var(--glow));
-    color: var(--bg-deep); font-family: 'Orbitron', sans-serif; font-weight: 800;
-    font-size: 12px; letter-spacing: 0.06em;
-    margin-bottom: 16px;
-    opacity: 0; animation: fadeUp 0.6s ease-out 1.4s forwards;
-  }
-  .game-btn svg{ width: 14px; height: 14px; }
+  .link-btn svg{ width: 12px; height: 12px; stroke: var(--teal); }
 
   .readout{
-    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: rgba(232,238,255,0.4);
-    border-top: 1px dashed rgba(11,164,200,0.28); padding-top: 14px; line-height: 1.9;
-    opacity: 0; animation: fadeUp 0.6s ease-out 1.5s forwards;
+    font-family: 'Space Mono', monospace; font-size: 9.5px; color: rgba(232,238,255,0.4);
+    border-top: 1px dashed rgba(11,164,200,0.28); padding-top: 12px; line-height: 1.8;
+    opacity: 0; animation: fadeUp 0.6s ease-out 1.45s forwards;
   }
   .readout strong{ color: var(--teal); font-weight: 700; }
 
   @keyframes fadeUp{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: translateY(0); } }
 
-  /* ============ パターンA ============ */
-  .hud-grid{
-    position: fixed; inset: 0; z-index: 0; display: none; opacity: 0.10;
+  /* ============ 背景装飾（パターンA/B/C） ============ */
+  .hud-grid{ position: fixed; inset: 0; z-index: 0; display: none; opacity: 0.10;
     background-image: linear-gradient(var(--teal) 1px, transparent 1px), linear-gradient(90deg, var(--teal) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse at 50% 30%, black 0%, transparent 70%);
-    pointer-events: none;
-  }
+    background-size: 40px 40px; mask-image: radial-gradient(ellipse at 50% 30%, black 0%, transparent 70%); pointer-events: none; }
   body.variant-a .hud-grid{ display: block; }
-
   .corner{ position: absolute; width: 22px; height: 22px; border: 2px solid var(--teal); display: none; }
   body.variant-a .corner{ display: block; }
   .corner--tl{ top: -1px; left: -1px; border-right: none; border-bottom: none; }
   .corner--tr{ top: -1px; right: -1px; border-left: none; border-bottom: none; }
   .corner--bl{ bottom: -1px; left: -1px; border-right: none; border-top: none; }
   .corner--br{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
-
   .scan-ring{ position: absolute; inset: -12px; border-radius: 50%; border: 1px dashed var(--teal); opacity: 0; display: none; }
   body.variant-a .scan-ring{ display: block; animation: ringSpin 12s linear infinite, fadeIn 0.6s ease-out 0.3s forwards; }
   .scan-ring.r2{ inset: -26px; border-style: solid; }
   body.variant-a .scan-ring.r2{ animation: ringSpinRev 18s linear infinite, fadeIn2 0.6s ease-out 0.4s forwards; }
   @keyframes ringSpin{ from{ transform: rotate(0deg); } to{ transform: rotate(360deg); } }
   @keyframes ringSpinRev{ from{ transform: rotate(0deg); } to{ transform: rotate(-360deg); } }
-  @keyframes fadeIn{ to{ opacity: 0.7; } }
-  @keyframes fadeIn2{ to{ opacity: 0.35; } }
+  @keyframes fadeIn{ to{ opacity: 0.7; } } @keyframes fadeIn2{ to{ opacity: 0.35; } }
 
-  .scanline{
-    position: fixed; left: 0; right: 0; height: 120px; top: -120px; z-index: 2;
-    background: linear-gradient(180deg, transparent, rgba(32,217,210,0.18), transparent);
-    pointer-events: none; display: none;
-  }
-  body.variant-a .scanline{ display: block; animation: sweep 1.8s ease-out 0.05s 1 forwards; }
-  @keyframes sweep{ 0%{ top: -120px; opacity: 0; } 10%{ opacity: 1; } 90%{ opacity: 1; } 100%{ top: 100%; opacity: 0; } }
-
-  /* ============ パターンB ============ */
   .city-layer{ position: fixed; inset: 0; z-index: 0; display: none; overflow: hidden; pointer-events: none; }
   body.variant-b .city-layer{ display: block; }
-  .beam{
-    position: absolute; top: -30%; width: 2px; height: 160%;
-    background: linear-gradient(180deg, transparent, var(--teal), transparent);
-    opacity: 0.28; animation: beamFall 3.6s linear infinite;
-  }
+  .beam{ position: absolute; top: -30%; width: 2px; height: 160%; background: linear-gradient(180deg, transparent, var(--teal), transparent); opacity: 0.28; animation: beamFall 3.6s linear infinite; }
   @keyframes beamFall{ 0%{ transform: translateY(-15%); opacity: 0; } 15%{ opacity: 0.35; } 85%{ opacity: 0.35; } 100%{ transform: translateY(15%); opacity: 0; } }
   .skyline{ position: absolute; bottom: 0; left: 0; right: 0; height: 30%; display: flex; align-items: flex-end; gap: 3px; opacity: 0.6; }
   .skyline .b{ position: relative; flex: 1; background: linear-gradient(180deg, transparent, var(--primary)); border-top: 1px solid rgba(156,140,255,0.25); }
   .win{ position: absolute; width: 2px; height: 2px; background: var(--teal); opacity: 0.5; animation: twinkle 2.6s ease-in-out infinite; }
   @keyframes twinkle{ 0%,100%{ opacity: 0.15; } 50%{ opacity: 0.75; } }
 
-  /* ============ パターンC ============ */
   .network-layer{ position: fixed; inset: 0; z-index: 0; display: none; }
   body.variant-c .network-layer{ display: block; }
 
-  /* ============ ミニゲーム ============ */
-  .game-overlay{
-    position: fixed; inset: 0; z-index: 20; display: none;
-    align-items: center; justify-content: center;
-    background: rgba(1,3,10,0.92); backdrop-filter: blur(3px);
-    padding: 24px;
-  }
-  .game-overlay.open{ display: flex; }
-  .game-box{ width: 100%; max-width: 340px; }
-  .game-header{
+  /* ============ ゲーム画面（下の画面） ============ */
+  .game-panel{ width: 100%; max-width: 360px; text-align: center; }
+  .game-topbar{
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
     font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-dim);
   }
-  .game-score{ color: var(--teal); font-weight: 700; }
-  .game-close{
-    background: none; border: 1px solid rgba(232,238,255,0.25); color: var(--ink);
-    width: 26px; height: 26px; border-radius: 50%; font-size: 14px; cursor: pointer; line-height: 1;
-  }
+  .game-title{ color: var(--ink); font-weight: 700; }
+  #liveScore{ color: var(--teal); font-weight: 700; }
+
+  .game-canvas-wrap{ position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 320px; margin: 0 auto; }
   #gameCanvas{
-    width: 100%; aspect-ratio: 3 / 4; display: block;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(232,238,255,0.15); border-radius: 10px;
+    width: 100%; height: 100%; display: block;
+    background: #000814; border: 1px solid rgba(232,238,255,0.15); border-radius: 8px;
+    image-rendering: pixelated; image-rendering: crisp-edges;
     touch-action: manipulation;
   }
-  .game-hint{
-    text-align: center; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--ink-dim); margin-top: 10px;
+  .start-caption{
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 20px; font-family: 'Space Mono', monospace; font-size: 11px;
+    color: var(--ink); background: rgba(1,3,10,0.35); pointer-events: none; line-height: 1.9;
   }
 
-  /* ▼ルール説明画面 */
-  .game-rules{
-    text-align: center;
-    padding: 28px 22px 24px;
-    border: 1px solid rgba(232,238,255,0.15);
-    border-radius: 10px;
-    background: rgba(255,255,255,0.03);
+  .game-result{
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; background: rgba(1,3,10,0.88); border-radius: 8px; padding: 16px;
   }
-  .game-rules-title{
-    font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 14px;
-    letter-spacing: 0.06em; color: var(--teal); margin-bottom: 16px;
+  .result-label{ font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-dim); }
+  .result-score{ font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 34px; color: var(--teal); text-shadow: 0 0 16px rgba(79,227,255,0.5); }
+  .result-high{ font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-dim); }
+  .new-record{
+    display: none; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800;
+    color: var(--bg-deep); background: linear-gradient(120deg, var(--teal), var(--glow));
+    padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em;
   }
-  .game-rules-visual{
-    width: 100%; height: 90px; margin-bottom: 16px;
-    display: flex; align-items: center; justify-content: center; gap: 14px;
+  .share-hint{
+    margin-top: 8px; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 12px;
+    color: var(--ink); line-height: 1.7;
   }
-  .game-rules-visual .rv-particle{
-    width: 14px; height: 14px; border-radius: 50%; background: var(--ink);
-    box-shadow: 0 0 10px var(--teal); flex-shrink: 0;
-  }
-  .game-rules-visual .rv-arrow{ color: var(--teal); font-size: 20px; }
-  .game-rules-visual .rv-wall{
-    width: 20px; height: 60px; position: relative; flex-shrink: 0;
-  }
-  .game-rules-visual .rv-wall::before, .game-rules-visual .rv-wall::after{
-    content: ''; position: absolute; left: 0; right: 0; background: var(--teal); opacity: 0.85;
-  }
-  .game-rules-visual .rv-wall::before{ top: 0; height: 18px; }
-  .game-rules-visual .rv-wall::after{ bottom: 0; height: 18px; }
-  .game-rules-list{
-    text-align: left; list-style: none; margin: 0 0 20px; padding: 0;
-    font-size: 12.5px; line-height: 1.9; color: var(--ink-dim);
-  }
-  .game-rules-list li{ display: flex; gap: 8px; margin-bottom: 6px; }
-  .game-rules-list li::before{
-    content: '▸'; color: var(--teal); flex-shrink: 0;
-  }
-  .game-start-btn{
-    display: inline-block; width: 100%;
-    padding: 12px 0; border-radius: 999px; border: none; cursor: pointer;
-    background: linear-gradient(120deg, var(--teal), var(--glow));
-    color: var(--bg-deep); font-family: 'Orbitron', sans-serif; font-weight: 800;
-    font-size: 13px; letter-spacing: 0.06em;
+  .share-hint strong{ color: var(--teal); }
+  .retry-hint{ font-family: 'Space Mono', monospace; font-size: 10px; color: var(--ink-dim); margin-top: 10px; }
+
+  .game-caption{
+    margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--ink-dim); line-height: 1.8;
   }
 
   @media (prefers-reduced-motion: reduce){
-    .scanline, .scan-ring, .beam, .win{ animation: none !important; display: none !important; }
-    .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel, .game-btn{
+    .scan-ring, .beam, .win, .scroll-hint{ animation: none !important; }
+    .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel{
       animation: none !important; opacity: 1 !important; transform: none !important;
     }
     .status-dot{ animation: none; }
@@ -308,103 +230,80 @@
   <div class="field"></div>
   <div class="grain"></div>
   <div class="hud-grid"></div>
-  <div class="scanline"></div>
-
   <div class="city-layer" id="cityLayer"></div>
   <canvas class="network-layer" id="networkLayer"></canvas>
+  <span class="corner corner--tl"></span>
+  <span class="corner corner--tr"></span>
+  <span class="corner corner--bl"></span>
+  <span class="corner corner--br"></span>
 
-  <div class="frame">
-    <span class="corner corner--tl"></span>
-    <span class="corner corner--tr"></span>
-    <span class="corner corner--bl"></span>
-    <span class="corner corner--br"></span>
+  <div class="scroll-container" id="scrollContainer">
 
-    <div class="card">
+    <!-- ▼1画面目：来場お礼 -->
+    <section class="section-main">
+      <div class="frame">
+        <div class="card">
+          <div class="logo-wrap">
+            <span class="scan-ring"></span>
+            <span class="scan-ring r2"></span>
+            <img src="logo.png" alt="第45回技大祭ロゴ">
+          </div>
+          <div class="status-row"><span class="status-dot"></span><span id="statusText"></span></div>
+          <div class="event-line">第45回技大祭</div>
+          <div class="date-line">令和8年 9/19（土）・9/20（日）</div>
+          <h1>ご来場<br><span class="accent">ありがとうございます！</span></h1>
+          <p class="msg" id="msgText"></p>
 
-      <div class="logo-wrap">
-        <span class="scan-ring"></span>
-        <span class="scan-ring r2"></span>
-        <img src="logo.png" alt="第45回技大祭ロゴ">
-      </div>
+          <div class="carousel" id="carousel">
+            <div class="carousel-track" id="carouselTrack"></div>
+            <button class="carousel-arrow prev" id="prevBtn" aria-label="前の写真">‹</button>
+            <button class="carousel-arrow next" id="nextBtn" aria-label="次の写真">›</button>
+            <div class="carousel-dots" id="carouselDots"></div>
+          </div>
 
-      <div class="status-row">
-        <span class="status-dot"></span>
-        <span id="statusText"></span>
-      </div>
+          <div class="link-buttons">
+            <a class="link-btn" href="https://www.instagram.com/nutfes" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none"/></svg>
+              Instagram
+            </a>
+            <a class="link-btn" href="https://www.nutfes.net/" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9s1.3-6.5 3.8-9z"/></svg>
+              ホームページ
+            </a>
+          </div>
 
-      <div class="event-line">第45回技大祭</div>
-      <div class="date-line">令和8年 9/19（土）・9/20（日）</div>
-
-      <h1>ご来場<br><span class="accent">ありがとうございます！</span></h1>
-
-      <p class="msg" id="msgText"></p>
-
-      <div class="carousel" id="carousel">
-        <div class="carousel-track" id="carouselTrack"></div>
-        <button class="carousel-arrow prev" id="prevBtn" aria-label="前の写真">‹</button>
-        <button class="carousel-arrow next" id="nextBtn" aria-label="次の写真">›</button>
-        <div class="carousel-dots" id="carouselDots"></div>
-      </div>
-
-      <div class="link-buttons">
-        <a class="link-btn" href="https://www.instagram.com/nutfes" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none"/></svg>
-          Instagram
-        </a>
-        <a class="link-btn" href="https://www.nutfes.net/" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9s1.3-6.5 3.8-9z"/></svg>
-          ホームページ
-        </a>
-      </div>
-
-      <button class="game-btn" id="openGameBtn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 10v4M5 12h4"/><circle cx="16" cy="10.5" r="0.8" fill="currentColor"/><circle cx="18" cy="13.5" r="0.8" fill="currentColor"/></svg>
-        ゲームで遊ぶ
-      </button>
-
-      <div class="readout">
-        <strong>#技大祭</strong> &nbsp;|&nbsp; <strong>#NUTFES</strong>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ▼ミニゲーム -->
-  <div class="game-overlay" id="gameOverlay">
-    <div class="game-box">
-
-      <!-- ルール説明画面 -->
-      <div class="game-rules" id="gameRules">
-        <div class="game-header" style="margin-bottom:18px;">
-          <span>MINI GAME</span>
-          <button class="game-close" id="gameCloseBtnRules" aria-label="閉じる">×</button>
+          <div class="readout"><strong>#技大祭</strong> &nbsp;|&nbsp; <strong>#NUTFES</strong></div>
         </div>
-        <div class="game-rules-title">壁よけタップゲーム</div>
-        <div class="game-rules-visual">
-          <span class="rv-particle"></span>
-          <span class="rv-arrow">→</span>
-          <span class="rv-wall"></span>
-        </div>
-        <ul class="game-rules-list">
-          <li>画面をタップすると、光る粒子がふわっと浮き上がります</li>
-          <li>奥から壁が流れてくるので、隙間をねらってすり抜けよう</li>
-          <li>壁に当たる・画面の外に出るとゲームオーバー</li>
-          <li>通過した壁の数がスコアになります</li>
-        </ul>
-        <button class="game-start-btn" id="startGameBtn" type="button">はじめる</button>
       </div>
+      <div class="scroll-hint">▼ スクロールでミニゲーム</div>
+    </section>
 
-      <!-- ゲーム本編 -->
-      <div id="gamePlay" style="display:none;">
-        <div class="game-header">
-          <span>SCORE: <span class="game-score" id="gameScore">0</span></span>
-          <button class="game-close" id="gameCloseBtn" aria-label="閉じる">×</button>
+    <!-- ▼2画面目：ミニゲーム -->
+    <section class="section-game">
+      <div class="game-panel">
+        <div class="game-topbar">
+          <span class="game-title">壁よけタップゲーム</span>
+          <span id="liveScore">SCORE 0</span>
         </div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-hint" id="gameHint">タップして開始</div>
-      </div>
 
-    </div>
+        <div class="game-canvas-wrap">
+          <canvas id="gameCanvas" width="100" height="100"></canvas>
+          <div class="start-caption" id="startCaption">タップでジャンプ<br>壁の隙間をすり抜けよう</div>
+
+          <div class="game-result" id="gameResult" hidden>
+            <span class="new-record" id="newRecordTag">NEW RECORD!</span>
+            <div class="result-label">SCORE</div>
+            <div class="result-score" id="resultScore">0</div>
+            <div class="result-high">HIGH SCORE: <span id="resultHigh">0</span></div>
+            <div class="share-hint">📸 スクショして <strong>#技大祭</strong> でシェアしよう！</div>
+            <div class="retry-hint">タップでもう一度</div>
+          </div>
+        </div>
+
+        <div class="game-caption">操作はタップのみ／隙間の広さは変わらず、進むほどスピードが上がります</div>
+      </div>
+    </section>
+
   </div>
 
 <script>
@@ -413,28 +312,22 @@
     { id: 'variant-b', status: 'SIGNAL LOCKED',       message: '今日1日が、楽しく過ごせることを願っています',           photos: ['photos/photo-b1.jpg','photos/photo-b2.jpg','photos/photo-b3.jpg','photos/photo-b4.jpg'] },
     { id: 'variant-c', status: 'LOG: ENTRY RECORDED', message: 'いろんな企画に参加して、景品をたくさんもらおう！',       photos: ['photos/photo-c1.jpg','photos/photo-c2.jpg','photos/photo-c3.jpg','photos/photo-c4.jpg'] }
   ];
-
   const picked = variants[Math.floor(Math.random() * variants.length)];
   document.body.classList.add(picked.id);
   document.getElementById('statusText').textContent = picked.status;
   document.getElementById('msgText').textContent = picked.message;
 
-  /* ---- 写真スライドショー ---- */
   const track = document.getElementById('carouselTrack');
   const dotsWrap = document.getElementById('carouselDots');
   let current = 0;
-
   picked.photos.forEach((src, i) => {
     const img = document.createElement('img');
-    img.src = src;
-    img.alt = `技大祭 過去の様子 ${i + 1}`;
-    img.loading = i === 0 ? 'eager' : 'lazy';
+    img.src = src; img.alt = `技大祭 過去の様子 ${i + 1}`; img.loading = i === 0 ? 'eager' : 'lazy';
     track.appendChild(img);
     const dot = document.createElement('span');
     if (i === 0) dot.classList.add('active');
     dotsWrap.appendChild(dot);
   });
-
   function goTo(index){
     const total = picked.photos.length;
     current = (index + total) % total;
@@ -443,29 +336,22 @@
   }
   document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
   document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
-
   let startX = 0;
   track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
   track.addEventListener('touchend', e => {
     const diff = e.changedTouches[0].clientX - startX;
-    if (diff > 40) goTo(current - 1);
-    else if (diff < -40) goTo(current + 1);
+    if (diff > 40) goTo(current - 1); else if (diff < -40) goTo(current + 1);
   }, { passive: true });
 
-  /* ---- パターンB：ビルと光の柱 ---- */
   if (picked.id === 'variant-b') {
     const layer = document.getElementById('cityLayer');
     const skyline = document.createElement('div');
     skyline.className = 'skyline';
-    const heights = [30,55,40,70,50,85,45,60,35,75,50,65,40,58,48,66,38,72];
-    heights.forEach(h => {
-      const b = document.createElement('div');
-      b.className = 'b';
-      b.style.height = h + '%';
+    [30,55,40,70,50,85,45,60,35,75,50,65,40,58,48,66,38,72].forEach(h => {
+      const b = document.createElement('div'); b.className = 'b'; b.style.height = h + '%';
       const winCount = Math.floor(h / 12);
       for (let i = 0; i < winCount; i++) {
-        const win = document.createElement('span');
-        win.className = 'win';
+        const win = document.createElement('span'); win.className = 'win';
         win.style.left = (10 + Math.random() * 80) + '%';
         win.style.bottom = (10 + Math.random() * 80) + '%';
         win.style.animationDelay = (Math.random() * 2.6) + 's';
@@ -475,221 +361,42 @@
     });
     layer.appendChild(skyline);
     for (let i = 0; i < 9; i++) {
-      const beam = document.createElement('div');
-      beam.className = 'beam';
-      beam.style.left = (5 + i * 11) + '%';
-      beam.style.animationDelay = (i * 0.45) + 's';
+      const beam = document.createElement('div'); beam.className = 'beam';
+      beam.style.left = (5 + i * 11) + '%'; beam.style.animationDelay = (i * 0.45) + 's';
       layer.appendChild(beam);
     }
   }
 
-  /* ---- パターンC：背景の粒子ネットワーク（ゲーム中は一時停止できるようにフラグ管理） ---- */
-  let bgNetworkPaused = false;
   if (picked.id === 'variant-c') {
     const canvas = document.getElementById('networkLayer');
     const ctx = canvas.getContext('2d');
     let w, h, points;
-
     function resize(){ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
     function initPoints(){
       const count = Math.min(60, Math.floor((w * h) / 20000));
-      points = Array.from({ length: count }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
-        r: 1 + Math.random() * 1.8
-      }));
+      points = Array.from({ length: count }, () => ({ x: Math.random()*w, y: Math.random()*h, vx:(Math.random()-0.5)*0.25, vy:(Math.random()-0.5)*0.25, r:1+Math.random()*1.8 }));
     }
     resize(); initPoints();
     window.addEventListener('resize', () => { resize(); initPoints(); });
-
     function draw(){
-      if (!bgNetworkPaused) {
-        ctx.clearRect(0, 0, w, h);
-        points.forEach(p => {
-          p.x += p.vx; p.y += p.vy;
-          if (p.x < 0 || p.x > w) p.vx *= -1;
-          if (p.y < 0 || p.y > h) p.vy *= -1;
-          ctx.beginPath();
-          ctx.fillStyle = 'rgba(79,140,255,0.75)';
-          ctx.shadowColor = 'rgba(79,140,255,0.6)';
-          ctx.shadowBlur = 4;
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.shadowBlur = 0;
-        for (let i = 0; i < points.length; i++) {
-          for (let j = i + 1; j < points.length; j++) {
-            const dx = points[i].x - points[j].x, dy = points[i].y - points[j].y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 130) {
-              ctx.strokeStyle = `rgba(79,140,255,${0.18 * (1 - dist / 130)})`;
-              ctx.lineWidth = 1;
-              ctx.beginPath();
-              ctx.moveTo(points[i].x, points[i].y);
-              ctx.lineTo(points[j].x, points[j].y);
-              ctx.stroke();
-            }
-          }
-        }
+      ctx.clearRect(0,0,w,h);
+      points.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x<0||p.x>w) p.vx*=-1; if (p.y<0||p.y>h) p.vy*=-1;
+        ctx.beginPath(); ctx.fillStyle='rgba(79,140,255,0.75)'; ctx.shadowColor='rgba(79,140,255,0.6)'; ctx.shadowBlur=4;
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+      for (let i=0;i<points.length;i++) for (let j=i+1;j<points.length;j++){
+        const dx=points[i].x-points[j].x, dy=points[i].y-points[j].y, dist=Math.sqrt(dx*dx+dy*dy);
+        if (dist<130){ ctx.strokeStyle=`rgba(79,140,255,${0.18*(1-dist/130)})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(points[i].x,points[i].y); ctx.lineTo(points[j].x,points[j].y); ctx.stroke(); }
       }
       requestAnimationFrame(draw);
     }
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) draw();
   }
-
-  /* ================= ミニゲーム（壁よけタップゲーム） ================= */
-  const overlay = document.getElementById('gameOverlay');
-  const openBtn = document.getElementById('openGameBtn');
-  const closeBtn = document.getElementById('gameCloseBtn');
-  const closeBtnRules = document.getElementById('gameCloseBtnRules');
-  const rulesScreen = document.getElementById('gameRules');
-  const playScreen = document.getElementById('gamePlay');
-  const startGameBtn = document.getElementById('startGameBtn');
-  const canvas = document.getElementById('gameCanvas');
-  const ctx2 = canvas.getContext('2d');
-  const scoreEl = document.getElementById('gameScore');
-  const hintEl = document.getElementById('gameHint');
-
-  const GW = 300, GH = 400; // ゲーム内部の論理サイズ（固定）
-  canvas.width = GW;
-  canvas.height = GH;
-
-  let accentColor = '#0BA4C8';
-
-  let gameRunning = false;
-  let gameStarted = false;
-  let particle, walls, score, frame, gameLoopId;
-
-  function resetGame(){
-    particle = { x: 70, y: GH / 2, vy: 0, r: 8 };
-    walls = [];
-    score = 0;
-    frame = 0;
-    gameStarted = false;
-    scoreEl.textContent = '0';
-    hintEl.textContent = 'タップして開始';
-    drawGameFrame();
-  }
-
-  function spawnWall(){
-    const wallWidth = 34;
-    const gapHeight = 110;
-    const gapY = 40 + Math.random() * (GH - 80 - gapHeight);
-    walls.push({ x: GW, w: wallWidth, gapY, gapHeight, passed: false });
-  }
-
-  function drawGameFrame(){
-    ctx2.clearRect(0, 0, GW, GH);
-
-    // 背景グリッド（うっすら）
-    ctx2.strokeStyle = 'rgba(232,238,255,0.04)';
-    ctx2.lineWidth = 1;
-    for (let gx = 0; gx < GW; gx += 25) {
-      ctx2.beginPath(); ctx2.moveTo(gx, 0); ctx2.lineTo(gx, GH); ctx2.stroke();
-    }
-
-    // 壁
-    walls.forEach(wall => {
-      ctx2.fillStyle = accentColor;
-      ctx2.globalAlpha = 0.85;
-      ctx2.fillRect(wall.x, 0, wall.w, wall.gapY);
-      ctx2.fillRect(wall.x, wall.gapY + wall.gapHeight, wall.w, GH - (wall.gapY + wall.gapHeight));
-      ctx2.globalAlpha = 1;
-    });
-
-    // 粒子
-    ctx2.beginPath();
-    ctx2.fillStyle = '#E8EEFF';
-    ctx2.shadowColor = accentColor;
-    ctx2.shadowBlur = 14;
-    ctx2.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
-    ctx2.fill();
-    ctx2.shadowBlur = 0;
-  }
-
-  function stepGame(){
-    frame++;
-    particle.vy += 0.35;
-    particle.y += particle.vy;
-
-    if (frame % 95 === 0) spawnWall();
-
-    walls.forEach(wall => { wall.x -= 2.3; });
-    walls = walls.filter(wall => wall.x + wall.w > -10);
-
-    // 衝突判定
-    let hit = false;
-    if (particle.y - particle.r < 0 || particle.y + particle.r > GH) hit = true;
-
-    walls.forEach(wall => {
-      const withinX = particle.x + particle.r > wall.x && particle.x - particle.r < wall.x + wall.w;
-      if (withinX) {
-        const inGap = particle.y - particle.r > wall.gapY && particle.y + particle.r < wall.gapY + wall.gapHeight;
-        if (!inGap) hit = true;
-      }
-      if (!wall.passed && wall.x + wall.w < particle.x) {
-        wall.passed = true;
-        score++;
-        scoreEl.textContent = score;
-      }
-    });
-
-    drawGameFrame();
-
-    if (hit) {
-      gameRunning = false;
-      hintEl.textContent = `GAME OVER — タップでリトライ（スコア ${score}）`;
-      return;
-    }
-    gameLoopId = requestAnimationFrame(stepGame);
-  }
-
-  function jumpOrStart(){
-    if (!gameStarted) {
-      gameStarted = true;
-      gameRunning = true;
-      hintEl.textContent = '';
-      particle.vy = -6;
-      gameLoopId = requestAnimationFrame(stepGame);
-      return;
-    }
-    if (!gameRunning) {
-      resetGame();
-      gameStarted = true;
-      gameRunning = true;
-      particle.vy = -6;
-      gameLoopId = requestAnimationFrame(stepGame);
-      return;
-    }
-    particle.vy = -6;
-  }
-
-  canvas.addEventListener('pointerdown', jumpOrStart);
-
-  openBtn.addEventListener('click', () => {
-    accentColor = getComputedStyle(document.body).getPropertyValue('--teal').trim() || '#0BA4C8';
-    bgNetworkPaused = true;
-    overlay.classList.add('open');
-    rulesScreen.style.display = 'block';
-    playScreen.style.display = 'none';
-  });
-
-  startGameBtn.addEventListener('click', () => {
-    rulesScreen.style.display = 'none';
-    playScreen.style.display = 'block';
-    resetGame();
-  });
-
-  function closeGame(){
-    overlay.classList.remove('open');
-    gameRunning = false;
-    if (gameLoopId) cancelAnimationFrame(gameLoopId);
-    bgNetworkPaused = false;
-  }
-  closeBtn.addEventListener('click', closeGame);
-  closeBtnRules.addEventListener('click', closeGame);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 </script>
 
+<script src="game.js" defer></script>
 </body>
 </html>
