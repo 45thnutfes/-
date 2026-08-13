@@ -72,7 +72,7 @@
     score = 0;
     spawnDist = 0;
     lastSpawnAt = 0;
-    speed = 0.9;
+    speed = 0.65;
     elapsed = 0;
     liveScoreEl.textContent = 'SCORE 0';
     resultEl.classList.remove('show');
@@ -81,7 +81,7 @@
 
   function spawnWall() {
     const w = 6;
-    const gap = 26; // 隙間の広さは常に一定（難度は速度のみで上げる）
+    const gap = 30; // 隙間の広さは常に一定（難度は速度のみで上げる）
     const gapY = 12 + Math.random() * (GH - 24 - gap);
     walls.push({ x: GW, w, gapY, gap, passed: false });
   }
@@ -145,7 +145,7 @@
     player.y += player.vy;
 
     // 難度上昇：スコアに応じて速度だけ上げる（隙間は変えない）
-    speed = Math.min(3.0, 0.9 + score * 0.035);
+    speed = Math.min(2.6, 0.65 + score * 0.025);
 
     // 壁を進める
     walls.forEach(w => { w.x -= speed; });
