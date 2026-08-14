@@ -47,10 +47,10 @@
     -webkit-overflow-scrolling: touch;
   }
   .section-main{
-    height: calc(100% - 84px); /* あえて低くして、下のゲーム画面をしっかり覗かせる */
+    height: 100%;
     scroll-snap-align: start;
     display: flex; align-items: center; justify-content: center;
-    padding: 20px 18px 0;
+    padding: 20px 18px 76px;
     position: relative;
   }
   .section-game{
@@ -59,21 +59,27 @@
     display: flex; align-items: center; justify-content: center;
     padding: 24px 18px;
   }
-  .scroll-hint{
-    position: fixed; bottom: 14px; left: 0; right: 0; z-index: 4;
-    text-align: center; font-family: 'Space Mono', monospace; font-size: 10px;
-    color: var(--ink); letter-spacing: 0.05em;
-    pointer-events: none;
-    animation: bounce 1.6s ease-in-out infinite, hintFade 0.4s ease-out;
-    transition: opacity 0.25s;
+
+  /* ▼下にゲーム画面が少し覗いているように見せる固定プレビュー帯 */
+  .game-peek{
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 4;
+    display: flex; justify-content: center; pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
   }
-  .scroll-hint span{
-    display: inline-block; padding: 5px 12px; border-radius: 999px;
-    background: rgba(1,3,10,0.65); border: 1px solid rgba(232,238,255,0.18);
-    backdrop-filter: blur(3px);
+  .game-peek-card{
+    pointer-events: auto; cursor: pointer;
+    width: calc(100% - 36px); max-width: 320px;
+    background: linear-gradient(180deg, rgba(11,164,200,0.16), rgba(1,3,10,0.94));
+    border: 1px solid rgba(232,238,255,0.2); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    padding: 10px 16px 24px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink);
+    box-shadow: 0 -8px 22px rgba(0,0,0,0.35);
+    animation: bounce 1.8s ease-in-out infinite;
   }
-  @keyframes hintFade{ from{ opacity: 0; } to{ opacity: 1; } }
-  @keyframes bounce{ 0%,100%{ transform: translateY(0); opacity: 0.6; } 50%{ transform: translateY(4px); opacity: 1; } }
+  .game-peek-card svg{ width: 13px; height: 13px; stroke: var(--teal); }
+  @keyframes bounce{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
 
   .frame{
     position: relative; width: 100%; max-width: 420px;
@@ -182,14 +188,17 @@
   /* ============ ゲーム画面（下の画面） ============ */
   .game-panel{ width: 100%; max-width: 360px; text-align: center; }
   .game-topbar{
-    display: flex; justify-content: space-between; align-items: center; margin: 0 auto 10px;
-    max-width: 320px;
+    position: relative; margin: 0 auto 10px; max-width: 320px;
+    text-align: center;
     font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-dim);
     transition: opacity 0.2s, transform 0.2s;
   }
   .game-panel.playing .game-topbar{ opacity: 0; transform: translateY(-6px); pointer-events: none; }
-  .game-title{ color: var(--ink); font-weight: 700; }
-  #liveScore{ color: var(--teal); font-weight: 700; }
+  .game-title{ color: var(--ink); font-weight: 700; display: block; }
+  #liveScore{
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    color: var(--teal); font-weight: 700; font-size: 10px;
+  }
 
   .game-canvas-wrap{ position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 320px; margin: 0 auto; touch-action: manipulation; }
   #gameCanvas{
@@ -233,7 +242,7 @@
   .game-panel.playing .game-caption{ opacity: 0; }
 
   @media (prefers-reduced-motion: reduce){
-    .scan-ring, .beam, .win, .scroll-hint{ animation: none !important; }
+    .scan-ring, .beam, .win, .game-peek-card{ animation: none !important; }
     .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel{
       animation: none !important; opacity: 1 !important; transform: none !important;
     }
@@ -291,7 +300,12 @@
           <div class="readout"><strong>#技大祭</strong> &nbsp;|&nbsp; <strong>#NUTFES</strong></div>
         </div>
       </div>
-      <div class="scroll-hint" id="scrollHint"><span>▼ スクロールでミニゲーム</span></div>
+      <div class="game-peek" id="scrollHint">
+        <div class="game-peek-card" id="peekCard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+          壁よけタップゲーム、この下で遊べます
+        </div>
+      </div>
     </section>
 
     <!-- ▼2画面目：ミニゲーム -->
@@ -311,7 +325,6 @@
             <div class="result-label">SCORE</div>
             <div class="result-score" id="resultScore">0</div>
             <div class="result-high">HIGH SCORE: <span id="resultHigh">0</span></div>
-            <div class="share-hint">📸 スクショして <strong>#技大祭</strong> でシェアしよう！</div>
             <div class="retry-hint">タップでもう一度</div>
           </div>
         </div>
@@ -419,6 +432,9 @@
   const scrollContainer = document.getElementById('scrollContainer');
   scrollContainer.addEventListener('scroll', () => {
     scrollHint.style.opacity = scrollContainer.scrollTop > 20 ? '0' : '1';
+  });
+  document.getElementById('peekCard').addEventListener('click', () => {
+    scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
   });
 </script>
 
