@@ -221,6 +221,6 @@
 
   draw();
 
-  canvas.addEventListener('pointerdown', jump);
-  resultEl.addEventListener('pointerdown', jump);
+  canvas.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
+  resultEl.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 })();
