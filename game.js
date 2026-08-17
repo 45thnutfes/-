@@ -3,7 +3,7 @@
    - 画面解像度: 100x100（ドット絵前提）
    - キャラクター: 6x6
    - 操作: 画面タップのみ（ワンボタン）
-   - 難度上昇: スピードのみ（隙間の広さは一定 = 理不尽さを抑える）
+   - 難度上昇: スピード＋隙間の広さ（序盤は隙間を広めにし、スコアに応じて既定の広さまで徐々に狭める）
    - 音: Web Audio APIで自動生成（音声ファイル不要）
    - ハイスコア: localStorage に保存
    ============================================================ */
@@ -84,9 +84,13 @@
   }
   reset();
 
+  const GAP_START = 40; // 序盤の隙間の広さ（易しめ）
+  const GAP_MIN = 30; // 隙間の広さの下限（従来のバランスと同じ値）
+  const GAP_EASE_SCORE = 15; // このスコアに達するまでに隙間がGAP_MINまで狭まる
+
   function spawnWall() {
     const w = 6;
-    const gap = 30; // 隙間の広さは常に一定（難度は速度のみで上げる）
+    const gap = Math.max(GAP_MIN, GAP_START - (GAP_START - GAP_MIN) * (score / GAP_EASE_SCORE));
     const gapY = 12 + Math.random() * (GH - 24 - gap);
     walls.push({ x: GW, w, gapY, gap, passed: false });
   }
