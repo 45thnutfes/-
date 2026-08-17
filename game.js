@@ -242,7 +242,7 @@
     ctx.fillStyle = '#E8EEFF';
     ctx.fillRect(cx, cy, 6, 6);
     ctx.fillStyle = col;
-    ctx.fillRect(cx + 3, cy + 1, 2, 2); // 目（アクセント色の1ドット）
+    // ctx.fillRect(cx + 3, cy + 1, 2, 2); // 目（アクセント色の1ドット）
   }
 
   draw();
