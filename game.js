@@ -18,10 +18,103 @@
   const resultHighEl = document.getElementById('resultHigh');
   const newRecordEl = document.getElementById('newRecordTag');
   const startCaption = document.getElementById('startCaption');
+  const retryHintEl = document.getElementById('retryHint');
 
   const HIGH_KEY = 'nutfes45_wallgame_highscore';
   let highScore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
   resultHighEl.textContent = highScore;
+
+  /* ---- ランキング（Google Apps Script連携） ---- */
+  // デプロイしたGASウェブアプリのURL（末尾が /exec）に置き換えてください
+  const RANKING_API_URL = 'https://script.google.com/macros/s/AKfycbxu1Yc3_dkdCsYTHQHsrW1xmpPfsgM_JQ_qwLDUzy8v41Scjl_v5lopeTTufVJdPoE/exec';
+  const RANKING_SIZE = 10;
+
+  const rankingListEl = document.getElementById('rankingList');
+  const rankEntryEl = document.getElementById('rankEntry');
+  const rankNicknameInput = document.getElementById('rankNickname');
+  const rankSubmitBtn = document.getElementById('rankSubmitBtn');
+  const rankSkipBtn = document.getElementById('rankSkipBtn');
+
+  let rankingCache = [];
+  let pendingScore = null;
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+
+  function renderRanking() {
+    if (!rankingCache.length) {
+      rankingListEl.innerHTML = '<li class="ranking-empty">まだ記録がありません</li>';
+      return;
+    }
+    rankingListEl.innerHTML = rankingCache.map((entry, i) => `
+      <li>
+        <span class="rank-no">${i + 1}</span>
+        <span class="rank-name">${escapeHtml(entry.nickname)}</span>
+        <span class="rank-score">${entry.score}</span>
+      </li>
+    `).join('');
+  }
+
+  function loadRanking() {
+    if (!RANKING_API_URL || RANKING_API_URL.indexOf('YOUR_GAS_WEB_APP_URL') === 0) return;
+    fetch(RANKING_API_URL)
+      .then(r => r.json())
+      .then(data => {
+        rankingCache = Array.isArray(data) ? data : [];
+        renderRanking();
+      })
+      .catch(() => { /* ランキング取得に失敗しても本編ゲームには影響させない */ });
+  }
+
+  function qualifiesForRanking(s) {
+    if (!RANKING_API_URL || RANKING_API_URL.indexOf('YOUR_GAS_WEB_APP_URL') === 0) return false;
+    if (rankingCache.length < RANKING_SIZE) return s > 0;
+    return s > rankingCache[rankingCache.length - 1].score;
+  }
+
+  function submitRanking(nickname, s) {
+    rankSubmitBtn.disabled = true;
+    rankSkipBtn.disabled = true;
+    fetch(RANKING_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // application/jsonにするとCORSプリフライトでGASが対応できないためtext/plainで送る
+      body: JSON.stringify({ nickname, score: s })
+    })
+      .then(r => r.json())
+      .then(() => {
+        rankEntryEl.style.display = 'none';
+        retryHintEl.style.display = '';
+        loadRanking();
+      })
+      .catch(() => {
+        rankEntryEl.style.display = 'none';
+        retryHintEl.style.display = '';
+      })
+      .finally(() => {
+        rankSubmitBtn.disabled = false;
+        rankSkipBtn.disabled = false;
+      });
+  }
+
+  rankSubmitBtn.addEventListener('pointerdown', e => e.stopPropagation());
+  rankSkipBtn.addEventListener('pointerdown', e => e.stopPropagation());
+  rankNicknameInput.addEventListener('pointerdown', e => e.stopPropagation());
+
+  rankSubmitBtn.addEventListener('click', e => {
+    e.preventDefault();
+    const nickname = (rankNicknameInput.value || '').trim().slice(0, 10) || '名無し';
+    submitRanking(nickname, pendingScore);
+  });
+  rankSkipBtn.addEventListener('click', e => {
+    e.preventDefault();
+    rankEntryEl.style.display = 'none';
+    retryHintEl.style.display = '';
+  });
+
+  loadRanking();
 
   function accent() {
     return getComputedStyle(document.body).getPropertyValue('--teal').trim() || '#0BA4C8';
@@ -148,6 +241,17 @@
     resultScoreEl.textContent = score;
     resultHighEl.textContent = highScore;
     newRecordEl.style.display = isRecord ? 'inline-block' : 'none';
+
+    if (qualifiesForRanking(score)) {
+      pendingScore = score;
+      rankNicknameInput.value = '';
+      rankEntryEl.style.display = 'flex';
+      retryHintEl.style.display = 'none';
+    } else {
+      rankEntryEl.style.display = 'none';
+      retryHintEl.style.display = '';
+    }
+
     resultEl.classList.add('show');
     window.dispatchEvent(new CustomEvent('gameEnd', { detail: { score, highScore } }));
   }
