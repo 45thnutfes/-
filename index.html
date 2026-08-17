@@ -228,6 +228,57 @@
   }
   .game-panel.playing .game-caption{ opacity: 0; }
 
+  /* ============ ランキング ============ */
+  .ranking-panel{
+    margin: 16px auto 0; max-width: 320px; text-align: left;
+    border: 1px solid rgba(11,164,200,0.28); border-radius: 8px;
+    padding: 12px 14px; background: rgba(0,29,165,0.08);
+  }
+  .ranking-title{
+    font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    color: var(--teal); text-align: center; margin-bottom: 8px;
+  }
+  .ranking-list{ list-style: none; margin: 0; padding: 0; }
+  .ranking-list li{
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink);
+    padding: 4px 2px; border-bottom: 1px dashed rgba(232,238,255,0.1);
+  }
+  .ranking-list li:last-child{ border-bottom: none; }
+  .ranking-list li.ranking-empty{ color: var(--ink-dim); justify-content: center; padding: 8px 0; }
+  .rank-no{ width: 20px; flex-shrink: 0; color: var(--ink-dim); }
+  .ranking-list li:nth-child(1) .rank-no{ color: #FFD24A; }
+  .ranking-list li:nth-child(2) .rank-no{ color: #D9D9E3; }
+  .ranking-list li:nth-child(3) .rank-no{ color: #E0A46E; }
+  .rank-name{ flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank-score{ color: var(--teal); font-weight: 700; flex-shrink: 0; }
+
+  .rank-entry{
+    display: none; width: 100%; margin-top: 2px;
+    flex-direction: column; align-items: center; gap: 6px;
+  }
+  .rank-entry-label{
+    font-family: 'Space Mono', monospace; font-size: 10px; color: var(--teal); letter-spacing: 0.02em;
+    text-align: center;
+  }
+  .rank-nickname-input{
+    width: 100%; max-width: 200px; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid rgba(232,238,255,0.3); background: rgba(255,255,255,0.06);
+    color: var(--ink); font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 16px; /* iOS Safariはinputのfont-sizeが16px未満だとフォーカス時に自動ズームするため16px以上に固定 */
+    text-align: center;
+    touch-action: manipulation; user-select: text; -webkit-user-select: text;
+  }
+  .rank-nickname-input:focus{ outline: none; border-color: var(--teal); }
+  .rank-entry-buttons{ display: flex; gap: 8px; }
+  .rank-btn{
+    font-family: 'Space Mono', monospace; font-size: 10px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(232,238,255,0.22); background: rgba(255,255,255,0.04); color: var(--ink);
+    cursor: pointer; touch-action: manipulation;
+  }
+  .rank-btn-submit{ border-color: var(--teal); color: var(--teal); font-weight: 700; }
+  .rank-btn:disabled{ opacity: 0.5; }
+
   @media (prefers-reduced-motion: reduce){
     .scan-ring, .beam, .win{ animation: none !important; }
     .frame, .logo-wrap, .status-row, .event-line, .date-line, h1, p.msg, .readout, .link-buttons, .carousel, .game-panel{
@@ -299,11 +350,28 @@
                 <div class="result-label">SCORE</div>
                 <div class="result-score" id="resultScore">0</div>
                 <div class="result-high">HIGH SCORE: <span id="resultHigh">0</span></div>
-                <div class="retry-hint">タップでもう一度</div>
+
+                <div class="rank-entry" id="rankEntry">
+                  <div class="rank-entry-label">TOP10入り！ニックネームを登録しよう</div>
+                  <input type="text" id="rankNickname" class="rank-nickname-input" maxlength="10" placeholder="ニックネーム" autocomplete="off">
+                  <div class="rank-entry-buttons">
+                    <button type="button" id="rankSubmitBtn" class="rank-btn rank-btn-submit">登録する</button>
+                    <button type="button" id="rankSkipBtn" class="rank-btn rank-btn-skip">スキップ</button>
+                  </div>
+                </div>
+
+                <div class="retry-hint" id="retryHint">タップでもう一度</div>
               </div>
             </div>
 
             <div class="game-caption">操作はタップのみ／進むほどスピードが上がり隙間が狭くなります</div>
+
+            <div class="ranking-panel" id="rankingPanel">
+              <div class="ranking-title">RANKING TOP 10</div>
+              <ol class="ranking-list" id="rankingList">
+                <li class="ranking-empty">まだ記録がありません</li>
+              </ol>
+            </div>
           </div>
 
           <div class="readout"><strong>#技大祭</strong> &nbsp;|&nbsp; <strong>#NUTFES</strong></div>
