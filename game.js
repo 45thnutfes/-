@@ -70,6 +70,10 @@
   const MAX_DT_FACTOR = 5; // タブ非アクティブからの復帰直後などdeltaTimeが跳ねた場合の1フレームあたりの上限
   let lastTime = null;
 
+  const SPEED_START = 0.65; // 初速（従来と同じ、序盤の速さは維持）
+  const SPEED_MAX = 3.6; // 最高速度（従来の2.6より引き上げ、後半の伸びを体感しやすくする）
+  const SPEED_GROWTH = 0.025; // スコア1につき上がる速度（従来の0.025から3倍）
+
   function reset() {
     player = { x: 22, y: GH / 2, vy: 0, r: 3 };
     walls = [];
@@ -77,14 +81,14 @@
     score = 0;
     spawnDist = 0;
     lastSpawnAt = 0;
-    speed = 0.65;
+    speed = SPEED_START;
     elapsed = 0;
     liveScoreEl.textContent = 'SCORE 0';
     resultEl.classList.remove('show');
   }
   reset();
 
-  const GAP_START = 40; // 序盤の隙間の広さ（易しめ）
+  const GAP_START = 50; // 序盤の隙間の広さ（易しめ）
   const GAP_MIN = 30; // 隙間の広さの下限（従来のバランスと同じ値）
   const GAP_EASE_SCORE = 15; // このスコアに達するまでに隙間がGAP_MINまで狭まる
 
@@ -163,11 +167,11 @@
     elapsed += dtFactor;
 
     // 物理
-    player.vy += 0.14 * dtFactor;
+    player.vy += 0.13 * dtFactor;
     player.y += player.vy * dtFactor;
 
-    // 難度上昇：スコアに応じて速度だけ上げる（隙間は変えない）
-    speed = Math.min(2.6, 0.65 + score * 0.025);
+    // 難度上昇：スコアに応じて速度・隙間の広さを変化させる
+    speed = Math.min(SPEED_MAX, SPEED_START + score * SPEED_GROWTH);
 
     // 壁を進める
     walls.forEach(w => { w.x -= speed * dtFactor; });
