@@ -65,6 +65,11 @@
   let state = 'ready'; // ready -> playing -> over
   let player, walls, particles, score, spawnDist, lastSpawnAt, speed, elapsed, loopId;
 
+  // 経過時間ベースの進行用（端末の性能・リフレッシュレート差を吸収する）
+  const REF_FPS = 60; // 既存の速度・加速度の数値は60fps基準で調整されているため、この基準に正規化する
+  const MAX_DT_FACTOR = 5; // タブ非アクティブからの復帰直後などdeltaTimeが跳ねた場合の1フレームあたりの上限
+  let lastTime = null;
+
   function reset() {
     player = { x: 22, y: GH / 2, vy: 0, r: 3 };
     walls = [];
@@ -104,6 +109,7 @@
       window.dispatchEvent(new CustomEvent('gameStart'));
       startBgm();
       player.vy = -2.4;
+      lastTime = null;
       loopId = requestAnimationFrame(loop);
       return;
     }
@@ -113,6 +119,7 @@
       window.dispatchEvent(new CustomEvent('gameStart'));
       startBgm();
       player.vy = -2.4;
+      lastTime = null;
       loopId = requestAnimationFrame(loop);
       return;
     }
@@ -137,22 +144,33 @@
     window.dispatchEvent(new CustomEvent('gameEnd', { detail: { score, highScore } }));
   }
 
-  function loop() {
-    elapsed++;
+  function loop(timestamp) {
+    // 実経過時間を「60fps基準で何フレーム分か」に正規化する。
+    // こうすることで既存のフレーム単位の数値（重力・速度など）をそのまま使いつつ、
+    // 端末の性能やリフレッシュレートに関わらず実時間基準で進行するようになる。
+    let dtFactor;
+    if (lastTime === null) {
+      dtFactor = 1; // 初回フレームは1フレーム分として扱う
+    } else {
+      dtFactor = Math.min((timestamp - lastTime) / 1000 * REF_FPS, MAX_DT_FACTOR);
+    }
+    lastTime = timestamp;
+
+    elapsed += dtFactor;
 
     // 物理
-    player.vy += 0.14;
-    player.y += player.vy;
+    player.vy += 0.14 * dtFactor;
+    player.y += player.vy * dtFactor;
 
     // 難度上昇：スコアに応じて速度だけ上げる（隙間は変えない）
     speed = Math.min(2.6, 0.65 + score * 0.025);
 
     // 壁を進める
-    walls.forEach(w => { w.x -= speed; });
+    walls.forEach(w => { w.x -= speed * dtFactor; });
     walls = walls.filter(w => w.x + w.w > -4);
 
     // 移動距離で壁を生成（速度が上がっても壁同士の間隔は一定に保たれる）
-    spawnDist += speed;
+    spawnDist += speed * dtFactor;
     if (spawnDist - lastSpawnAt > 46) {
       spawnWall();
       lastSpawnAt = spawnDist;
@@ -175,7 +193,7 @@
     });
 
     // パーティクル更新
-    particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
+    particles.forEach(p => { p.x += p.vx * dtFactor; p.y += p.vy * dtFactor; p.life -= dtFactor; });
     particles = particles.filter(p => p.life > 0);
 
     draw();
