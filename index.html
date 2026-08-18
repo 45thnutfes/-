@@ -475,13 +475,16 @@
   window.addEventListener('gameEnd', () => gamePanel.classList.remove('playing'));
 
   // iOS Safari ダブルタップズーム対策
-  // touch-action: manipulation はiOSのバージョンによっては確実に効かないことがあるため、
+  // touch-action: none / manipulation はiOSのバージョンによっては確実に効かないことがあるため、
   // JS側でも短時間内の連続タップ(ダブルタップ)を検知してデフォルト動作(ズーム)を止める。
-  // ゲーム操作エリアはタップ連打が正規の操作のため対象外にする（既にtouch-action:noneで保護済み）。
+  // ゲーム本体・リザルト画面のタップは pointerdown で判定しており、
+  // touchendのpreventDefault()はジャンプ／リスタート動作に影響しないため、
+  // ゲームキャンバス内も対象に含める。ニックネーム入力フォームのみ、
+  // フォーカス・クリックがtouchend起点のため対象外にする。
   (function () {
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function (e) {
-      if (e.target.closest && e.target.closest('.game-canvas-wrap')) return;
+      if (e.target.closest && e.target.closest('.rank-entry')) return;
       const now = Date.now();
       if (now - lastTouchEnd <= 350) {
         e.preventDefault();
