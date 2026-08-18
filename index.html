@@ -232,7 +232,7 @@
   .ranking-panel{
     margin: 16px auto 0; max-width: 320px; text-align: left;
     border: 1px solid rgba(11,164,200,0.28); border-radius: 8px;
-    padding: 12px 14px; background: rgba(0,29,165,0.08);
+    padding: 24px 14px; background: rgba(0,29,165,0.08);
   }
   .ranking-title{
     font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
@@ -473,6 +473,22 @@
   const gamePanel = document.getElementById('gamePanel');
   window.addEventListener('gameStart', () => gamePanel.classList.add('playing'));
   window.addEventListener('gameEnd', () => gamePanel.classList.remove('playing'));
+
+  // iOS Safari ダブルタップズーム対策
+  // touch-action: manipulation はiOSのバージョンによっては確実に効かないことがあるため、
+  // JS側でも短時間内の連続タップ(ダブルタップ)を検知してデフォルト動作(ズーム)を止める。
+  // ゲーム操作エリアはタップ連打が正規の操作のため対象外にする（既にtouch-action:noneで保護済み）。
+  (function () {
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+      if (e.target.closest && e.target.closest('.game-canvas-wrap')) return;
+      const now = Date.now();
+      if (now - lastTouchEnd <= 350) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+  })();
 </script>
 
 <script src="game.js" defer></script>
